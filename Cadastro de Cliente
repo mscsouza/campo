@@ -1,0 +1,848 @@
+from tkinter import *
+from tkinter import ttk
+from tkinter import tix
+from tkinter import messagebox
+from sqlite3 import Error
+from random import *
+from tkinter.constants import *
+from tkinter import colorchooser
+import Banco
+import pycep_correios
+import sqlite3
+import os
+import tkinter as tk
+import tkinter.ttk as ttk
+from PIL import Image, ImageTk
+import base64
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from datetime import datetime
+import sys
+import time
+from time import sleep
+import cadastus
+import math
+
+valores=[]
+val =[int(x) for x in valores]
+nomes = []
+
+def login():
+    vuser = users.get()
+    vsenha = senhas.get()
+    cadastus.cursor.execute("""
+    SELECT * FROM users 
+    WHERE (Usuario=?  and Senha=?)
+    """, (vuser, vsenha))
+    verificarlogin = cadastus.cursor.fetchone()
+    try:
+        def upda():
+            label_messa.config(fg='#000080')
+
+        label_messa = tk.Label(aba1, text='Você esta Logado', background='#66CDAA', fg='#66CDAA', font='bold 12',
+                               width=30)
+        label_messa.place(x=145, y=0)
+        label_messa.update_idletasks()
+
+        if (vuser in verificarlogin and vsenha in verificarlogin):
+            label_mess.config(text='Acesso Liberado  ', background='lightblue', fg='black', font='bold 15', width=40)
+            label_mess.update_idletasks()
+            sleep(2)
+
+            janela.deiconify()
+            root.destroy()
+            botcadastro = tk.Button(janela, text='Você esta Logado', command=janela.after(1000, upda))
+
+    except:
+
+        label_mess.config(text='Senha ou Usuario esta Errado  ', background='lightblue', fg='black', font='bold 15',
+                          width=40)
+        label_mess.update_idletasks()
+        sleep(2)
+        label_mess.config(text='')
+
+    return
+
+
+
+
+
+def sair():
+    if messagebox.askyesno('Voce quer mesmo sair ?'):
+        root.destroy()
+        janela.destroy()
+        sys.exit()
+
+
+def update():
+    label_messag.config(fg="red")
+
+
+janela = tk.Tk()
+root = tk.Tk()
+root.title('Login')
+root.geometry('500x300')
+root.configure(background='lightblue')
+root.resizable(True, True)
+
+img = PhotoImage(file='C:\\Users\\Marcos\\Pictures\\Brazil_cob_logo.png')
+janela.iconphoto(False, img)
+
+userslabel = tk.Label(root, text='Usuario', background='lightblue', font='bold 15')
+userslabel.place(x=12, y=117)
+users = tk.Entry(root, text='User')
+users.place(x=90, y=121)
+senhaslabel = tk.Label(root, text='Senha', background='lightblue', font='bold 15')
+senhaslabel.place(x=14, y=140)
+senhas = tk.Entry(root, text='Senha', show='*')
+senhas.place(x=90, y=143)
+# bot = Button(root, text='Você esta Logado', command=root.after(3000,update))
+# bot.place(x=240, y=120)
+
+bot_entrar = ttk.Button(root, text='Entrar', command=login, width=15)
+bot_entrar.place(x=50, y=240)
+bot_sair = ttk.Button(root, text='Sair', command=sair, width=15)
+bot_sair.place(x=180, y=240)
+
+label_titulo = tk.Label(root, text='Tela de Login', background='lightblue', font='bold 20')
+label_titulo.place(x=160, y=5)
+
+label_certo = Label(root, text='    ', bg='green', fg='red', font='bold 15', width=40)
+label_certo.place(x=40, y=50)
+label_mess = Label(root, text='    ', bg='lightblue', fg='black', font='bold 15', width=40)
+label_mess.place(x=40, y=90)
+label_messag = tk.Label(root, text='Para Acessar coloque sua Identificação Abaixo \n ou Faça seu  Cadastro ',
+                        background='lightblue', fg='lightblue', font='bold 15', width=40)
+label_messag.place(x=40, y=40)
+
+bot = tk.Button(root, text='Você esta Logado', command=root.after(1000, update))
+
+
+def register():
+    label_certo.place(x=40)
+    label_mess.place(x=5000)
+    label_titulo.place(x=5000)
+    bot_entrar.place(x=5000)
+    bot_cadastrar.place(x=5000)
+    label_messag.place(x=5000)
+    root.configure(background='green')
+    userslabel = Label(root, text='Usuario', background='green', font='bold 15')
+    userslabel.place(x=12, y=117)
+    senhaslabel = Label(root, text='Senha', background='green', font='bold 15')
+    senhaslabel.place(x=14, y=140)
+    label_titul = Label(root, text='Cadastro de Novo Usuario', background='green', font='bold 20')
+    label_titul.place(x=90, y=10)
+    nomelabel = Label(root, text='Nome', font='bold 15', background='green')
+    nomelabel.place(x=20, y=70)
+    nomeentry = Entry(root, text='Nome', width=60)
+    nomeentry.place(x=90, y=77)
+    emaillabel = Label(root, text='Email', background='green', font='bold 15')
+    emaillabel.place(x=18, y=95)
+    emailentry = Entry(root, text='Email', width=60)
+    emailentry.place(x=91, y=99)
+
+    def cadastraruser():
+        if users.get() == "" or senhas.get() == "" or nomeentry.get() == "" or senhas.get() == "":
+            label_certo.config(text='Preecha todos os Campos', bg='green', fg='#000080')
+            label_certo.update_idletasks()
+            sleep(2)
+            label_certo.config(text='')
+
+            return
+        try:
+            vnome = (nomeentry.get())
+            vemail = (emailentry.get())
+            vusers = (users.get())
+            vsenhas = (senhas.get())
+            cadastus.cursor.execute('''
+            INSERT INTO users (Nome,Email,Usuario,Senha)VALUES(?,?,?,?)
+            ''', (vnome, vemail, vusers, vsenhas))
+            cadastus.conn.commit()
+        except:
+            messagebox.showinfo(title='ERRO', message='Não deu para Cadastrar Usuario')
+            return
+        nomeentry.delete(0, END)
+        emailentry.delete(0, END)
+        users.delete(0, END)
+        senhas.delete(0, END)
+        nomeentry.focus
+        label_certo.config(text='Usuario Cadastrado com Sucesso', bg='green', fg='#000080')
+        label_certo.update_idletasks()
+        sleep(2)
+        label_certo.config(text='')
+
+    def back():
+        label_certo.place(x=5000)
+        bot_registrar.place(x=5000)
+        root.configure(background='lightblue')
+        bot_voltar.place(x=5000)
+        label_titul.place(x=5000)
+        userslabel.place(x=5000)
+        senhaslabel.place(x=5000)
+        label_messag.place(x=30)
+        label_titulo.place(x=160)
+        nomelabel.place(x=5000)
+        nomeentry.place(x=5000)
+        emailentry.place(x=5000)
+        emaillabel.place(x=5000)
+        bot_entrar.place(x=50)
+
+        label_mess.place(x=40)
+        bot_cadastrar.place(x=290)
+
+    bot_voltar = ttk.Button(root, text='Voltar', command=back)
+    bot_voltar.place(x=310, y=240)
+
+    bot_registrar = ttk.Button(root, text='Registrar', command=cadastraruser)
+    bot_registrar.place(x=100, y=240)
+
+
+bot_cadastrar = ttk.Button(root, text='Cadastrar', command=register, width=15)
+bot_cadastrar.place(x=290, y=240)
+
+janela.title('Cadastro')
+janela.geometry('800x600')
+janela.configure(background='#66CDAA')
+janela.resizable(True, True)
+
+
+abas = ttk.Notebook(janela)
+aba1 = Frame(abas)
+aba2 = Frame(abas)
+aba3 = Frame(abas)
+aba1.configure(background='#66CDAA')
+# aba2.configure(background=' ')
+abas.add(aba1, text='Cadastro')
+abas.add(aba2, text='Loterias')
+abas.add(aba3, text='Teste')
+abas.place(relx=0, rely=0, relwidth=1.00, relheight=1.00)
+
+# colocando uma imagema
+
+images = PhotoImage(
+    data='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')
+label400 = Label(aba2, image=images)
+label400.place(relx=0.21, rely=0.01, relwidth=0.60, relheight=0.35)
+
+pastaApp = "C:\\Users\\Marcos\\Documents\\projetos PYTHON"
+
+
+def gerar_pdf():
+    try:
+        y = 0
+
+        cnv = canvas.Canvas(pastaApp + "\\TestedePDF.pdf", pagesize=A4)
+        cnv.setFillColor("red")
+        cnv.setFont("Times-Bold", 20)
+        cnv.drawString(250, 820, "Relatorios:")
+        cnv.setFont("Times-Bold", 20)
+        cnv.setFillColor("blue")
+        cnv.drawString(28, 805, "Nome")
+        cnv.drawString(155, 805, "Endereço")
+        cnv.drawString(327, 805, "Cidade")
+        cnv.drawString(390, 805, "Bairro")
+        cnv.drawString(466, 805, "Cep")
+        cnv.drawString(510, 805, "Telefone")
+        cnv.drawString(580, 805, "Obs")
+        cnv.setFillColor("black")
+        for pdf in nomes:
+            y = y + 15
+            cnv.drawString(10, 807 - y, pdf)
+        cnv.save()
+    except:
+        messagebox.showinfo(title="ERRO", message='Erro ao criar o Arquivo em PDF')
+        return
+    label_pdf.config(text='PDF Criado com Sucesso  ', background='#66CDAA', fg='black', font='bold 15', width=40)
+    label_pdf.update_idletasks()
+    sleep(2)
+
+    # messagebox.showinfo(title="PDF", message="PDF Criado com Sucesso")
+
+
+label_pdf = Label(aba1, text='    ', bg='#66CDAA', fg='black', font='bold 15', width=40)
+label_pdf.place(x=400, y=255)
+
+
+##################################################################################
+def popula():  ##este comando faz preecher o PDF
+    tv.delete(*tv.get_children())
+    vquery = "select Nome,Endereço,Cidade,Uf,Bairro,Valor,Cep,Telefone FROM Cadastro ORDER BY Nome ASC; "
+    linha = Banco.dql(vquery)
+    for nome in linha:
+        nomes.append(tv.insert("", "end", nome))
+
+
+tv = ttk.Treeview()
+popula()
+
+
+####################################################################################
+def popular():
+    tv.delete(*tv.get_children())
+    vquery = "select Codigo,Nome,Endereço,Cidade,Uf,Bairro,Valor,Cep,Telefone,Obs FROM Cadastro ORDER BY Nome ASC; "
+    linha = Banco.dql(vquery)
+    for i in linha:
+        tv.insert("", "end", values=i)
+
+
+style = ttk.Style()
+
+style.theme_use("default")
+
+style.configure("Treeview",
+                background="lightblue",
+                foreground="black",
+                rowheight=25,
+                fieldbackground="#D3D3D3")
+
+style.map('Treeview', background=[('selected', "#347083")])
+
+
+def excluir():
+    if messagebox.askyesno('Você quer mesmo Excluir'):
+        try:
+            vCodigo = -1
+            itemSelecionado = tv.selection()[0]
+            valores = tv.item(itemSelecionado, "values")
+            vCodigo = valores[0]
+            vquery = "DELETE FROM Cadastro where Codigo=" + vCodigo
+            Banco.dml(vquery)
+            tv.delete(itemSelecionado)
+            messagebox.showinfo('Excluido com Sucesso')
+
+            tb_Codigo.delete(0, END)
+            tb_Nome.delete(0, END)
+            tb_Endereco.delete(0, END)
+            tb_Cidade.delete(0, END)
+            tb_Uf.delete(0, END)
+            tb_Bairro.delete(0, END)
+            tb_Valor.delete(0, END)
+            tb_Cep.delete(0, END)
+            tb_Telefone.delete(0, END)
+            tb_Obs.delete(1.0, END)
+
+
+        except:
+            messagebox.showinfo(title=Error, message='Selecione algum item para EXCLUIR')
+
+
+def fechar():
+    if messagebox.askyesno('Voce quer sair mesmo'):
+        janela.destroy()
+
+
+def pesquizar():
+    tv.delete(*tv.get_children())
+    vquery = "SELECT * FROM Cadastro WHERE nome LIKE '%" + tb_Pesquizar.get() + "%' order by Codigo"
+    linhas = Banco.dql(vquery)
+
+    for i in linhas:
+        tv.insert("", "end", values=i)
+
+
+def alterar():
+    if tb_Codigo.get() == "":
+        label_alterar.config(text='Selicione um Cliente a ser Alterado  ', fg='black', font='bold 15', width=40)
+        label_alterar.update_idletasks()
+        sleep(2)
+        label_alterar.config(text='')
+        #messagebox.showinfo(title="ERRO", message="Selecione o Campo a ser Alterado")
+    else:
+        vquery = "UPDATE Cadastro SET Nome='" + tb_Nome.get() + "',Endereço='" + tb_Endereco.get() + "',Cidade='" + tb_Cidade.get() + "',Uf='" + tb_Uf.get() + "',Bairro='" + tb_Bairro.get() + "',Valor='" + tb_Valor.get() + "',Cep='" + tb_Cep.get() + "',Telefone='" + tb_Telefone.get() + "',Obs='" + tb_Obs.get(
+            "1.0", END) + "' WHERE Codigo='" + tb_Codigo.get() + "';"
+        Banco.dml(vquery)
+        popular()
+        tb_Codigo.delete(0, END)
+        tb_Nome.delete(0, END)
+        tb_Endereco.delete(0, END)
+        tb_Cidade.delete(0, END)
+        tb_Uf.delete(0, END)
+        tb_Bairro.delete(0, END)
+        tb_Valor.delete(0, END)
+        tb_Cep.delete(0, END)
+        tb_Telefone.delete(0, END)
+        tb_Obs.delete("1.0", END)
+        label_alterar.config(text='Usuario Alterado com Sucesso  ', fg='black', font='bold 15', width=40)
+        label_alterar.update_idletasks()
+        sleep(2)
+        label_alterar.config(text='')
+
+        # messagebox.showinfo('Cadastro Alterado com Sucesso')
+        tb_Nome.focus
+
+
+# validador de numeros
+def validate_entry2(text):
+    if text == "": return True
+    try:
+        value = int(text)
+    except ValueError:
+        return False
+    return 0 <= value <= 100000000000
+
+
+vcnd2 = (janela.register(validate_entry2), "%P")
+
+
+def salvar():
+    if tb_Nome.get() == "" or tb_Endereco.get() == "" or tb_Cidade.get() == "" or tb_Bairro.get() == "" or tb_Valor.get() == "" or tb_Cep.get() == "" or tb_Telefone.get() == "":
+        label_salvar.config(text='Prencha Todos os Campos', background='#66CDAA', fg='black', font='bold 15',
+                            width=40)
+        label_salvar.update_idletasks()
+        sleep(2)
+        label_salvar.config(text='')
+        #messagebox.showinfo(title="ERRO", message="Digite todos os Campos")
+        return
+    try:
+
+        vnome = (tb_Nome.get())
+        vendereco = (tb_Endereco.get())
+        vcidade = (tb_Cidade.get())
+        vuf = (tb_Uf.get())
+        vbairro = (tb_Bairro.get())
+        vvalor = (tb_Valor.get())
+        vcep = tb_Cep.get()
+        vtelefone = tb_Telefone.get()
+        vobs = (tb_Obs.get("1.0", END))
+
+        vquery = "INSERT INTO Cadastro(Nome,Endereço,Cidade,Uf,Bairro,Valor,Cep,Telefone,Obs )VALUES('" + vnome + "','" + vendereco + "','" + vcidade + "','" + vuf + "','" + vbairro + "','" + vvalor + "','" + vcep + "',' " + vtelefone + " ','" + vobs + "') "
+        Banco.dml(vquery)
+
+    except:
+        messagebox.showinfo(title='ERRO', message='Erro ao Inserir')
+        return
+    popular()
+
+    tb_Nome.delete(0, END)
+    tb_Endereco.delete(0, END)
+    tb_Cidade.delete(0, END)
+    tb_Uf.delete(0, END)
+    tb_Bairro.delete(0, END)
+    tb_Valor.delete(0, END)
+    tb_Cep.delete(0, END)
+    tb_Telefone.delete(0, END)
+    tb_Obs.delete("1.0", END)
+    tb_Nome.focus
+    label_salvar.config(text='Cliente Salvo com Sucesso  ', background='#66CDAA', fg='black', font='bold 15', width=40)
+    label_salvar.update_idletasks()
+    sleep(2)
+    label_salvar.config(text='')
+    # messagebox.showinfo(title='OK', message='cliente salvo com sucesso')
+
+
+def Limpar():
+    tb_Codigo.delete(0, END)
+    tb_Nome.delete(0, END)
+    tb_Endereco.delete(0, END)
+    tb_Cidade.delete(0, END)
+    tb_Uf.delete(0, END)
+    tb_Bairro.delete(0, END)
+    tb_Valor.delete(0, END)
+    tb_Cep.delete(0, END)
+    tb_Telefone.delete(0, END)
+    tb_Obs.delete(1.0, END)
+    tb_Nome.focus
+
+
+def CepCorreios():
+    try:
+        tb_Endereco.delete(0, END)
+        tb_Cidade.delete(0, END)
+        tb_Uf.delete(0, END)
+        tb_Bairro.delete(0, END)
+        zipcode = tb_Cep.get()
+        dadosCep = pycep_correios.get_address_from_cep(zipcode)
+        print(dadosCep)
+        tb_Endereco.insert(END, dadosCep['logradouro'])
+        tb_Cidade.insert(END, dadosCep['cidade'])
+        tb_Bairro.insert(END, dadosCep['bairro'])
+        tb_Uf.insert(END, dadosCep['uf'])
+    except:
+        labelcep.config(text='ERRO AO DIGITAR O CEP,O Cep informado Não Existe \n ou Esta Errado Digite um Cep Valido',
+                        background='#66CDAA', fg='black', font='bold 13', width=50)
+        labelcep.update_idletasks()
+        sleep(2)
+        labelcep.config(text='')
+        # messagebox.showinfo('ERRO AO DIGITAR O CEP','O Cep informado Não Existe \n ou esta Errado Digite um Cep Valido ')
+
+
+def OnDuploClick(event):
+    tv.selection()
+    for n in tv.selection():
+        col1, col2, col3, col4, col5, col6, col7, col8, col9, col10 = tv.item(n, "values")
+
+        tb_Codigo.delete(0, END)
+        tb_Nome.delete(0, END)
+        tb_Endereco.delete(0, END)
+        tb_Cidade.delete(0, END)
+        tb_Uf.delete(0, END)
+        tb_Bairro.delete(0, END)
+        tb_Valor.delete(0, END)
+        tb_Cep.delete(0, END)
+        tb_Telefone.delete(0, END)
+        tb_Obs.delete(1.0, END)
+
+        tb_Codigo.insert(END, col1)
+        tb_Nome.insert(END, col2)
+        tb_Endereco.insert(END, col3)
+        tb_Cidade.insert(END, col4)
+        tb_Uf.insert(END, col5)
+        tb_Bairro.insert(END, col6)
+        tb_Valor.insert(END, col7)
+        tb_Cep.insert(END, col8)
+        tb_Telefone.insert(END, col9)
+        tb_Obs.insert(END, col10)
+
+
+# Frame da Tela
+# frame1=Frame(aba1,background='#66CDAA')
+# frame1.place(relx=0.01,rely=0.01,relwidth=0.99, relheight=0.50)
+# frame2=Frame(janela ,background='#7FFFD4')
+# frame2.place(relx=0.1,rely=0.01,relwidth=0.99, relheight=0.99)
+
+
+def relogio():
+    tempo = datetime.today()
+
+    hora = tempo.strftime("%H:%M:%S")
+    dia_semana = tempo.strftime("%A")
+    dia = tempo.day
+    mes = tempo.strftime("%B")
+    ano = tempo.strftime("%Y")
+
+    if dia_semana == "Monday":
+        dia_semana = "Segunda Feira"
+    if dia_semana == "Tuesday":
+        dia_semana = "Terça Feira"
+    if dia_semana == "Wednesday":
+        dia_semana = "Quarta Feira"
+    if dia_semana == "Thursday":
+        dia_semana = "Quinta Feira"
+    if dia_semana == "Friday":
+        dia_semana = "Sexta Feira"
+    if dia_semana == "Saturday":
+        dia_semana = "Sabado"
+    if dia_semana == "Sunday":
+        dia_semana = "Domingo"
+
+    if mes == "January":
+        mes = "Janeiro"
+    if mes == "February":
+        mes = "Fevereiro"
+    if mes == "March":
+        mes = "Março"
+    if mes == "April":
+        mes = "Abril"
+    if mes == "May":
+        mes = "Maio"
+    if mes == "June":
+        mes = " Junho"
+    if mes == " July":
+        mes = " Julho"
+    if mes == "August":
+        mes = "Agosto"
+    if mes == "September":
+        mes = "Setembro"
+    if mes == "October":
+        mes = "Outubro"
+    if mes == "November":
+        mes = "Novembro"
+    if mes == "December":
+        mes = "Dezembro"
+
+    l1.config(text=hora)
+    l1.after(200, relogio)
+    l1.config(text=dia_semana + "  " + str(dia) + " de " + str(mes) + " de " + str(ano) + "  " + str(hora))
+
+
+# Labels do Relogio
+l1 = Label(aba1, font='Arial 10', text="relogio", background='Black', foreground='white')
+l1.place(relx=0.61, rely=0.02, relwidth=0.38)
+
+# Labels do Frame1
+label_salvar = Label(aba1, text=' ', background='#66CDAA', fg='black', font='bold 15', width=40)
+label_salvar.place(relx=0.05, rely=0.44)
+label_alterar = Label(aba1, text=' ', background='#66CDAA', fg='black', font='bold 15', width=40)
+label_alterar.place(relx=0.08, rely=0.40)
+label = Label(aba1, text="CODIGO", background='#66CDAA')
+label.place(relx=0.01, rely=0.01)
+label = Label(aba1, text='NOME:', background='#66CDAA')
+label.place(relx=0.01, rely=0.12)
+label = Label(aba1, text='ENDEREÇO:', background='#66CDAA')
+label.place(relx=0.01, rely=0.16)
+label = Label(aba1, text='CIDADE:', background='#66CDAA')
+label.place(relx=0.01, rely=0.20)
+label = Label(aba1, text='BAIRRO:', background='#66CDAA')
+label.place(relx=0.01, rely=0.24)
+label = Label(aba1, text='Valor:', background='#66CDAA')
+label.place(relx=0.01, rely=0.28)
+label = Label(aba1, text='CEP:', background='#66CDAA')
+label.place(relx=0.01, rely=0.32)
+labelcep = Label(text='')
+labelcep.place(relx=0, rely=0.43)
+label = Label(aba1, text='TELEFONE:', background='#66CDAA')
+label.place(relx=0.01, rely=0.36)
+label = Label(aba1, text='OBS:', background='#66CDAA')
+label.place(relx=0.63, rely=0.10)
+label = Label(aba1, text='PESQUIZAR:', background='#66CDAA')
+label.place(relx=0.01, rely=0.51)
+label = Label(aba1, text='UF:', background='#66CDAA')
+label.place(relx=0.41, rely=0.20)
+# Fazendo Entry
+
+tb_Codigo = Entry(aba1, text='Codigo', validate="key", validatecommand=vcnd2)
+tb_Codigo.place(relx=0.01, rely=0.05, relwidth=0.06)
+tb_Nome = Entry(aba1, text='Nome', fg='red')
+tb_Nome.place(relx=0.10, rely=0.12, relwidth=0.50)
+tb_Endereco = Entry(aba1, text='Endereco')
+tb_Endereco.place(relx=0.10, rely=0.16, relwidth=0.50)
+tb_Cidade = Entry(aba1, text='Cidade')
+tb_Cidade.place(relx=0.10, rely=0.20, relwidth=0.30)
+tb_Bairro = Entry(aba1, text='Bairro')
+tb_Bairro.place(relx=0.10, rely=0.24, relwidth=0.30)
+tb_Valor = Entry(aba1, text='Valor')
+tb_Valor.place(relx=0.10, rely=0.28, relwidth=0.30)
+tb_Cep = Entry(aba1, text='Cep', validate="key", validatecommand=vcnd2)
+tb_Cep.place(relx=0.10, rely=0.32, relwidth=0.20)
+tb_Telefone = Entry(aba1, text='Telefone', validate="key", validatecommand=vcnd2)
+tb_Telefone.place(relx=0.10, rely=0.36, relwidth=0.30)
+tb_Obs = Text(aba1)
+tb_Obs.place(relx=0.63, rely=0.13, relwidth=0.35, relheight=0.30)
+tb_Pesquizar = Entry(aba1, text='Pesquizar')
+tb_Pesquizar.place(relx=0.10, rely=0.51, relwidth=0.30)
+tb_Uf = Entry(aba1, text='UF:')
+tb_Uf.place(relx=0.44, rely=0.20, width=24)
+# Botões
+bt_limpar = ttk.Button(aba1, text='LIMPAR', command=Limpar)
+bt_limpar.place(relx=0.16, rely=0.04)
+# balao_limpar=tix.Balloon(aba1)
+# balao_limpar.bind_widget(bt_limpar,balloonmsg='Limpa os Campos')
+
+bt_salvar = ttk.Button(aba1, text='SALVAR', command=salvar)
+bt_salvar.place(relx=0.25, rely=0.04)
+# balao_salvar=tix.Balloon(aba1)
+# balao_salvar.bind_widget(bt_salvar,balloonmsg='Salva os Registros no Banco de Dados')
+
+bt_editar = ttk.Button(aba1, text='EDITAR', command=alterar)
+bt_editar.place(relx=0.34, rely=0.04)
+# balao_edita=tix.Balloon(aba1)
+# balao_edita.bind_widget(bt_editar,balloonmsg='Edita o Registro Selecionado')
+
+bt_excluir = ttk.Button(aba1, text='EXCLUIR', command=excluir)
+bt_excluir.place(relx=0.43, rely=0.04)
+# balao_excluir=tix.Balloon(aba1)
+# balao_excluir.bind_widget(bt_excluir,balloonmsg='Exclui os Registros do Banco de Dados')
+
+bt_fechar = ttk.Button(aba1, text='FECHAR', cursor='hand2', command=fechar)
+bt_fechar.place(relx=0.52, rely=0.04)
+# balao_fecha=tix.Balloon(aba1)
+# balao_fecha.bind_widget(bt_fechar,balloonmsg='Fecha o Cadastro de Cliente')
+
+bt_pdf = ttk.Button(aba1, text='GERAR PDF', width=15, command=gerar_pdf)
+bt_pdf.place(relx=0.65, rely=0.50)
+bt_pesquizar = ttk.Button(aba1, text='PESQUIZAR', command=pesquizar)
+bt_pesquizar.place(relx=0.41, rely=0.50)
+bt_mostrar = ttk.Button(aba1, text='MOSTRAR TUDO', command=popular)
+bt_mostrar.place(relx=0.51, rely=0.50)
+
+bt_cep = Button(aba1, text='Cep', width=8, height=0, command=CepCorreios)
+bt_cep.place(relx=0.31, rely=0.315)
+
+# balao_cep=tix.Balloon(aba1)
+# balao_cep.bind_widget(bt_cep,balloonmsg='Adiciona Automatico o Endereço a Cidade e o Bairro')
+
+
+# treevil
+tv = ttk.Treeview(aba1, height=3,
+                  column=('col1', 'col2', 'col3', 'col4', 'col5', 'col6', 'col7', 'col8', 'col9', ' col10 '),
+                  show='headings')
+# tv.heading("#0", text="")
+tv.heading("#1", text="Codigo")
+tv.heading("#2", text="Nome")
+tv.heading("#3", text="Endereço")
+tv.heading("#4", text="Cidade")
+tv.heading("#5", text="UF")
+tv.heading("#6", text="Bairro")
+tv.heading("#7", text="Valor")
+tv.heading("#8", text="Cep")
+tv.heading("#9", text="Telefone")
+tv.heading("#10", text="Obs")
+# tv.column("#0", width=0)
+tv.column("#1", width=20)
+tv.column("#2", width=100)
+tv.column("#3", width=100)
+tv.column("#4", width=50)
+tv.column("#5", width=50)
+tv.column("#6", width=30)
+tv.column("#7", width=40)
+tv.column("#8", width=40)
+tv.column("#9", width=50)
+tv.column("#10", width=10)
+tv.place(relx=0.00, rely=0.60, relwidth=0.96, relheight=0.40)
+
+tv.tag_configure("even ", background="Blue")
+tv.tag_configure("odd", background="white")
+popular()
+
+# Frame da Soma
+
+# bt=Button(janela,text='Total',command=tot,background='yellow',foreground='red' )
+# bt.place(x=10,y=288,relwidth=0.08)
+
+
+tv.bind("<ButtonRelease-1>", OnDuploClick)
+yscrollbar = ttk.Scrollbar(aba1, orient='vertical', command=tv.yview)
+# tv.configure(yscroll=scrooltv)
+yscrollbar.place(relx=0.96, rely=0.60, relwidth=0.04, relheight=0.40)
+tv.configure(yscrollcommand=yscrollbar.set)
+
+
+
+
+def sortear():
+    sorteios = []
+    contador = 1
+    while contador <= 6:
+        numero = randint(1, 60)
+        if not numero in sorteios:
+            sorteios = sorteios + [numero]
+            contador = contador + 1
+            sorteios.sort()
+
+    label['text'] = (sorteios[0])
+    label1['text'] = (sorteios[1])
+    label2['text'] = (sorteios[2])
+    label3['text'] = (sorteios[3])
+    label4['text'] = (sorteios[4])
+    label5['text'] = (sorteios[5])
+
+    label_mega.config(text='Mega Sena Gerado  ', fg='black', font='bold 15', width=40)
+    label_mega.update_idletasks()
+    sleep(2)
+    label_mega.config(text='')
+
+
+def sorte():
+    sorteios = []
+    contador = 1
+    while contador <= 15:
+        numero = randint(1, 25)
+        if not numero in sorteios:
+            sorteios = sorteios + [numero]
+            contador = contador + 1
+            sorteios.sort()
+
+    label6['text'] = (sorteios[0])
+    label7['text'] = (sorteios[1])
+    label8['text'] = (sorteios[2])
+    label9['text'] = (sorteios[3])
+    label10['text'] = (sorteios[4])
+    label11['text'] = (sorteios[5])
+    label12['text'] = (sorteios[6])
+    label13['text'] = (sorteios[7])
+    label14['text'] = (sorteios[8])
+    label15['text'] = (sorteios[9])
+    label16['text'] = (sorteios[10])
+    label17['text'] = (sorteios[11])
+    label18['text'] = (sorteios[12])
+    label19['text'] = (sorteios[13])
+    label20['text'] = (sorteios[14])
+    label_facil.config(text='Loto Facil Gerado  ', fg='black', font='bold 15', width=40)
+    label_facil.update_idletasks()
+    sleep(2)
+    label_facil.config(text='')
+
+
+label_facil = Label(aba2, text='')
+label_facil.place(x=200, y=360)
+
+label_mega = Label(aba2, text='')
+label_mega.place(x=200, y=240)
+
+bt = Button(aba2, width=15, text='MEGA SENNA', command=sortear, background='orange2',
+            font='30')
+bt.place(x=130, y=280)
+
+bt = Button(aba2, width=15, text='LOTO FACIL', command=sorte, background='orange4', font='30')
+bt.place(x=130, y=318)
+bt = Button(aba2, width=15, background='green', text='SAIR', font=30)
+bt.place(x=130, y=370)
+
+label100 = Label(aba2, text=('=' * 56))
+label100.place(x=280, y=265)
+label100 = Label(aba2, text=('=' * 56))
+label100.place(x=280, y=303)
+label100 = Label(aba2, text=('=' * 56))
+label100.place(x=280, y=340)
+
+label = Label(aba2, text='', font=100, foreground='#00008B')
+label.place(x=285, y=284)
+label1 = Label(aba2, text='', font=100, foreground='#00008B')
+label1.place(x=315, y=284)
+label2 = Label(aba2, text='', font=100, foreground='#00008B')
+label2.place(x=345, y=284)
+label3 = Label(aba2, text='', font=100, foreground='#00008B')
+label3.place(x=390, y=284)
+label4 = Label(aba2, text='', font=100, foreground='#00008B')
+label4.place(x=430, y=284)
+label5 = Label(aba2, text='', font=100, foreground='#00008B')
+label5.place(x=470, y=284)
+
+label6 = Label(aba2, text='', font=100, foreground='#00008B')
+label6.place(x=285, y=322)
+label7 = Label(aba2, text='', font=100, foreground='#00008B')
+label7.place(x=315, y=322)
+label8 = Label(aba2, text='', font=100, foreground='#00008B')
+label8.place(x=345, y=322)
+label9 = Label(aba2, text='', font=100, foreground='#00008B')
+label9.place(x=375, y=322)
+label10 = Label(aba2, text='', font=100, foreground='#00008B')
+label10.place(x=405, y=322)
+label11 = Label(aba2, text='', font=100, foreground='#00008B')
+label11.place(x=435, y=322)
+label12 = Label(aba2, text='', font=100, foreground='#00008B')
+label12.place(x=465, y=322)
+label13 = Label(aba2, text='', font=100, foreground='#00008B')
+label13.place(x=495, y=322)
+label14 = Label(aba2, text='', font=100, foreground='#00008B')
+label14.place(x=525, y=322)
+label15 = Label(aba2, text='', font=100, foreground='#00008B')
+label15.place(x=555, y=322)
+label16 = Label(aba2, text='', font=100, foreground='#00008B')
+label16.place(x=585, y=322)
+label17 = Label(aba2, text='', font=100, foreground='#00008B')
+label17.place(x=615, y=322)
+label18 = Label(aba2, text='', font=100, foreground='#00008B')
+label18.place(x=645, y=322)
+label19 = Label(aba2, text='', font=100, foreground='#00008B')
+label19.place(x=675, y=322)
+label20 = Label(aba2, text='', font=100, foreground='#00008B')
+label20.place(x=705, y=322)
+relogio()
+
+def popu():
+
+    vquery = "select Valor FROM Cadastro ; "
+    linha = Banco.dql(vquery)
+    for total in linha:
+          valores.append("", "end", values=total)
+
+
+def somar():
+
+    #somas=0
+    #for v in valores:
+        #somas=v
+        #somas=somas+1
+    label_soma["text"]=sum(val)
+    #return somas
+
+label_soma=Label(aba1,text='',bg='yellow',width=10)
+label_soma.place(relx=0.87,rely=0.50)
+but_soma=Button(aba1,text='Somar',command=somar)
+but_soma.place(relx=0.80,rely=0.50)
+
+
+
+janela.withdraw()
+janela.mainloop()
